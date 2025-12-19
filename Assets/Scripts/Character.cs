@@ -14,13 +14,17 @@ public class Character : MonoBehaviour
     
     private float _moveInput;
     private float _jumpInput;
+    private float _time;
+    private bool _canMove;
     public bool _isHit = false;
     [SerializeField] private float _XSpeed = 10;
     [SerializeField] private float _JumpForce = 500;
     [SerializeField] Detector _groundDetector;
     [SerializeField] Detector _leftDetector;
     [SerializeField] Detector _rightDetector;
-
+    [SerializeField] private float maxVelocity;
+    [SerializeField] private float MaxTime;
+    [SerializeField] private float WallForce;
     [SerializeField] private float _hitForce;
     
     //[SerializeField] private Transform _camera;
@@ -35,22 +39,30 @@ public class Character : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (!_isHit)
+        if (_rb.linearVelocityY >= maxVelocity)
+        {
+            _rb.linearVelocityY = maxVelocity;
+        }
+        if (_canMove)
         {
             _rb.linearVelocityX = _moveInput * _XSpeed;
         }
-       
+        if (_time <= 0)
+        {
+            _canMove = true;
+        }
+        _time -= Time.deltaTime;
     }
 
     private void Update()
     {
-        if(_rb.linearVelocityX < 0) _sr.flipX = true;
-        if(_rb.linearVelocityX > 0) _sr.flipX = false;
+        //if(_rb.linearVelocityX < 0) _sr.flipX = true;
+        //if(_rb.linearVelocityX > 0) _sr.flipX = false;
         
         _animator.SetFloat("velX", Mathf.Abs(_rb.linearVelocityX));
         _animator.SetFloat("jump", Mathf.Abs(_rb.linearVelocityY));   
         _animator.SetBool("IsHit", _isHit );
-        
+        FlipSprite();
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -83,6 +95,36 @@ public class Character : MonoBehaviour
             Debug.Log("Do a flip");
         }
         
+        if (!_groundDetector.Touched)
+        {
+            if (_leftDetector.Touched)
+            {
+                _rb.AddForce(new Vector2(1,1).normalized * WallForce, ForceMode2D.Impulse);
+                _canMove = false;
+                _sr.flipX = false;
+                _time = MaxTime;
+            }
+            if (_rightDetector.Touched)
+            {
+                _rb.AddForce(new Vector2(-1,1).normalized * WallForce, ForceMode2D.Impulse);
+                _canMove = false;
+                _sr.flipX = true;
+                _time = MaxTime;
+            }
+        }
+        
+    }
+
+    private void FlipSprite()
+    {
+        if(_moveInput > 0.1)
+        {
+            _sr.flipX = false;
+        }
+        if(_moveInput < -0.1)
+        {
+            _sr.flipX = true;
+        }
     }
     
     IEnumerator ResetHit_co()

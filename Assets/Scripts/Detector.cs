@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Detector : MonoBehaviour
 {
-    [SerializeField] private Vector2 _offset;
     [SerializeField] private Vector2 _size;
     [SerializeField] private LayerMask _mask;
     public bool Touched = false;
