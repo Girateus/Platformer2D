@@ -11,12 +11,15 @@ public class Character : MonoBehaviour
     private Rigidbody2D _rb;
     private SpriteRenderer _sr;
     private Animator _animator;
+    private DamageTaker _damageTaker;
     
     private float _moveInput;
     private float _jumpInput;
     private float _time;
     private bool _canMove;
     public bool _isHit = false;
+    public bool _isDead = false;
+    public bool _isSliding = false;
     [SerializeField] private float _XSpeed = 10;
     [SerializeField] private float _JumpForce = 500;
     [SerializeField] Detector _groundDetector;
@@ -34,6 +37,7 @@ public class Character : MonoBehaviour
         _rb = GetComponent<Rigidbody2D>();
         _sr = GetComponent<SpriteRenderer>();
         _animator = GetComponent<Animator>();
+        _damageTaker = GetComponent<DamageTaker>();
     }
 
     // Update is called once per frame
@@ -62,21 +66,42 @@ public class Character : MonoBehaviour
         _animator.SetFloat("velX", Mathf.Abs(_rb.linearVelocityX));
         _animator.SetFloat("jump", Mathf.Abs(_rb.linearVelocityY));   
         _animator.SetBool("IsHit", _isHit );
+        _animator.SetBool("IsDead", _isDead);
+        _animator.SetBool("WallSilde", _isSliding);
         FlipSprite();
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log("Hit what ?" + other.gameObject.name);
-        if (other.gameObject.CompareTag("Hazard"))
+        if (other.gameObject.CompareTag("Hazard")|| other.gameObject.CompareTag("Enemy"))
         {
-            Debug.Log("Hazard");
+            Debug.Log("Hazard Touché !");
+            
             _isHit = true;
-            _rb.linearVelocityX = 0;
+            _rb.linearVelocity = Vector2.zero;
+            
+            Vector2 knockbackDir = (transform.position - other.transform.position).normalized;
+            _rb.AddForce(knockbackDir * _hitForce, ForceMode2D.Impulse);
+            
+            if (_damageTaker != null)
+            {
+                _damageTaker.TakeDamage(1f);
+                
+            }
+            
+
             StopCoroutine("ResetHit_co");
             StartCoroutine("ResetHit_co");
-            
-        }
+        }  Debug.Log("Hit what ?" + other.gameObject.name);
+       
+    }
+    
+    public void SetDead()
+    {
+        _isDead = true;
+        _canMove = false; 
+        _rb.linearVelocity = Vector2.zero;
+        Debug.Log("dead !");
     }
 
    
@@ -99,6 +124,7 @@ public class Character : MonoBehaviour
         {
             if (_leftDetector.Touched)
             {
+                _isSliding = true;
                 _rb.AddForce(new Vector2(1,1).normalized * WallForce, ForceMode2D.Impulse);
                 _canMove = false;
                 _sr.flipX = false;
@@ -106,11 +132,16 @@ public class Character : MonoBehaviour
             }
             if (_rightDetector.Touched)
             {
+                _isSliding = true;
                 _rb.AddForce(new Vector2(-1,1).normalized * WallForce, ForceMode2D.Impulse);
                 _canMove = false;
                 _sr.flipX = true;
                 _time = MaxTime;
             }
+        }
+        else
+        {
+            _isSliding = false;
         }
         
     }
