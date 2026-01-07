@@ -32,15 +32,23 @@ public class DamageTaker : MonoBehaviour
         }
     }
 
+    public void Heal(float heal)
+    {
+        _hp += heal;
+        
+        if (_hp > _hpMax) 
+        {
+            _hp = _hpMax;
+        }
+    
+        OnHealthChanged.Invoke(_hp);
+    }
+
     private void Die()
     {
         
         _onDeath.Invoke();
-        /*if (_destroyable)
-        {
-            _gameOver.Invoke();
-           //Destroy(gameObject);
-        }*/
+       
     }
     
 }

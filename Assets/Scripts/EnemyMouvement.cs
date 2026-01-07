@@ -1,16 +1,56 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyMouvement : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    [SerializeField] private List<GameObject> _waypoints = new List<GameObject>();
+    [SerializeField] private GameObject _enemySprite;
+    [SerializeField] private float _speed = 2f;
+    
+    SpriteRenderer _spriteRenderer;
+    
+    int currentWaypointIndex = 0;
+    private bool facingRight = false;
 
-    // Update is called once per frame
+    private void Start()
+    {
+        _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+    }
+    
     void Update()
     {
+        if (_enemySprite.transform.position.x >= _waypoints[currentWaypointIndex].transform.position.x- 0.1f && _enemySprite.transform.position.x <= _waypoints[currentWaypointIndex].transform.position.x+0.1f)
+        {
+            if (currentWaypointIndex < _waypoints.Count - 1)
+            {
+                currentWaypointIndex++;
+            }
+            else
+            {
+                currentWaypointIndex = 0;
+            }
+        }
         
+        FlipSprite();
+    }
+
+    private void FixedUpdate()
+    {
+        _enemySprite.transform.position = Vector2.MoveTowards(_enemySprite.transform.position, _waypoints[currentWaypointIndex].transform.position, _speed * Time.deltaTime);
+    }
+
+    void FlipSprite()
+    {
+        Vector2 direction = _waypoints[currentWaypointIndex].transform.position - _enemySprite.transform.position;
+        if (direction.x < 0)
+        {
+            facingRight = false;
+        }
+        else if (direction.x > 0)
+        {
+            facingRight = true;
+        }
+        _spriteRenderer.flipX = facingRight;   
     }
 }
