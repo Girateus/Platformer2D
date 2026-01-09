@@ -20,6 +20,7 @@ public class Character : MonoBehaviour
     public bool _isHit = false;
     public bool _isDead = false;
     public bool _isSliding = false;
+    AudioManager audioManager;
     [SerializeField] private float _XSpeed = 10;
     [SerializeField] private float _JumpForce = 500;
     [SerializeField] Detector _groundDetector;
@@ -32,6 +33,10 @@ public class Character : MonoBehaviour
     
     //[SerializeField] private Transform _camera;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
+    private void Awake()
+    {
+        audioManager = GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioManager>();
+    }
     void Start()
     {
         _rb = GetComponent<Rigidbody2D>();
@@ -82,7 +87,7 @@ public class Character : MonoBehaviour
             
             Vector2 knockbackDir = (transform.position - other.transform.position).normalized;
             _rb.AddForce(knockbackDir * _hitForce, ForceMode2D.Impulse);
-            
+            audioManager.PlaySound(audioManager.DamageSound);
             if (_damageTaker != null)
             {
                 _damageTaker.TakeDamage(1f);
@@ -98,10 +103,13 @@ public class Character : MonoBehaviour
     
     public void SetDead()
     {
+        if (_isDead) return;
+        
         _isDead = true;
         _canMove = false; 
         _rb.linearVelocity = Vector2.zero;
         Debug.Log("dead !");
+        StartCoroutine(Respawn_co());
     }
 
    
@@ -162,5 +170,23 @@ public class Character : MonoBehaviour
     {
         yield return new WaitForSeconds(0.5f);
         _isHit = false;
+    }
+    
+    IEnumerator Respawn_co()
+    {
+        yield return new WaitForSeconds(1.5f);
+        
+        transform.position = LevelManager.Instance.GetSpawnPosition();
+        
+        _isDead = false;
+        _animator.SetBool("IsDead", false);
+    
+        _rb.simulated = true;
+        _canMove = true;
+        
+        if (_damageTaker != null)
+        {
+            _damageTaker.Heal(_damageTaker.HpMax);
+        }
     }
 }

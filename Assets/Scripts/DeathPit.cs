@@ -2,24 +2,17 @@ using UnityEngine;
 
 public class DeathPit : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    AudioManager audioManager;
+    private void Awake()
     {
-        
+        audioManager = GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioManager>();
     }
-
-    // Update is called once per frame
-    void Update()
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        
-    }
-    private void OnCollisionEnter2D(Collision2D other)
-    {
-        if (other.gameObject.CompareTag("Player"))
+        if (other.CompareTag("Player"))
         {
-            Debug.Log("boom " + other.gameObject.name);
-            Destroy(other.gameObject);
+            audioManager.PlaySound(audioManager.FallSound);
+            other.transform.position = LevelManager.Instance.GetSpawnPosition();
         }
-        
     }
 }

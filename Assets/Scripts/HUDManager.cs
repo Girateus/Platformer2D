@@ -6,6 +6,7 @@ public class HUDManager : MonoBehaviour
 {
     [SerializeField] private Image _healthBarFill; 
     [SerializeField] private DamageTaker _playerDamageTaker;
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {

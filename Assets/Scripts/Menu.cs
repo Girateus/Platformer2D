@@ -57,30 +57,12 @@ public class MenuManager : MonoBehaviour
             Application.Quit();
 #endif
     }
-
-    public void Pause()
-    {
-        Time.timeScale = 0.0f;
-        SetMainPanel();
-    }
-    public void Resume()
-    {
-        Time.timeScale = 1.0f;
-        _pausePanel.SetActive(false);
-        
-    }
+    
 
     public void MainMenu()
     {
-        SceneManager.LoadScene("UI");
+        SceneManager.LoadScene("Menu");
     }
-
-    public void SwitchPause()
-    {
-        if (Time.timeScale > 0.0f)
-            Pause();
-        else
-            Resume();
-    }
+    
     
 }

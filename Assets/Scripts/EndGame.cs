@@ -12,7 +12,7 @@ public class EndGame : MonoBehaviour
         {
             Debug.Log("I'm collided with " + other.gameObject.name);
             _endGame.Invoke();
-            Time.timeScale = 0.0f;
+            
         }
        
     }
